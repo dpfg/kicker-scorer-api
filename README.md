@@ -2,7 +2,7 @@
 REST-full web service to track kicker score
 
 ## Routes
-
+```
 POST	/communities
 GET		/communities
 
@@ -19,4 +19,4 @@ PUT 	/communities/NOWORK/matches/3415323/teamName/goal?player=ac	    - update sc
 PUT 	/communities/NOWORK/matches/3415323/teamLastName/goal    		- update score
 
 GET		/communities/NOWORK/matches/3415323	  					- get match result
-
+```
