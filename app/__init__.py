@@ -17,9 +17,7 @@ db = SQLAlchemy(app)
 
 def make_json_error(ex):
 	response = jsonify(message=str(ex))
-	response.status_code = (ex.code
-							if isinstance(ex, HTTPException)
-							else 500)
+	response.status_code = (ex.code if isinstance(ex, HTTPException) else 500)
 	return response
 
 for code in default_exceptions.keys():
