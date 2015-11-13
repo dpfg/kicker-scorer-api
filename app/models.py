@@ -41,6 +41,9 @@ class User(db.Model):
  												passive_deletes='all')
  	created = db.Column(db.TIMESTAMP, server_default=db.text('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
 
+ 	def __init__(self, email):
+ 		self.email = email
+
 class Player(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	community_id = db.Column(db.Integer, nullable = False, index = True)

@@ -4,19 +4,19 @@ from app.util import *
 from app.decorators import *
 from flask import jsonify, request
 
-@app.route("/")
-def index():
-	user = User.query.first()
-	coms = user.communities.first()
-	return str(coms.name)
+@app.route('/')
+def init():
+	db.session.add(User(email = 'super@exampe.com'))
+	db.session.commit()
+	return jsonify(message = 'service has been initialized')
 
 @app.route('/communities', methods=['GET'])
 def get_communities():
 	communities = Community.query.all()
 	return jsonify(communities = [i.serialize for i in communities])
 
-@json_content
 @app.route('/communities', methods=['POST'])
+@json_content
 def create_community():
 	if 'name' not in request.json:
 		return jsonify(message = "missed required name field"), 400
@@ -34,8 +34,8 @@ def create_community():
 	db.session.commit()
 	return ""
 
-@json_content
 @app.route('/communities/<community_name>/players', methods=['POST'])
+@json_content
 @community_resource
 def create_player(community):
 	if 'name' not in request.json:
@@ -55,7 +55,6 @@ def create_player(community):
 
 	return jsonify(username = player.username)
 
-@json_content
 @app.route('/communities/<community_name>/players', methods=['GET'])
 @community_resource
 def get_community_players(community):
@@ -66,8 +65,8 @@ def get_community_players(community):
 def get_community_teams(community):
 	return jsonify(teams=[t.serialize for t in community.teams])
 
-@json_content
 @app.route('/communities/<community_name>/teams', methods = ['POST'])
+@json_content
 @community_resource
 def create_team(community):
 	if 'name' not in request.json:
@@ -103,8 +102,8 @@ def create_team(community):
 
 	return jsonify("")
 
-@json_content
 @app.route('/communities/<community_name>/matches', methods = ['POST'])
+@json_content
 @community_resource
 def create_match(community):
 	if 'teams' not in request.json:
