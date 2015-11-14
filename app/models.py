@@ -125,6 +125,12 @@ class Match(db.Model):
         self.team0_id = team0.id
         self.team1_id = team1.id
 
+    def add_goal(self, team):
+    	if team.id == self.team0_id:
+    		self.team0_score = self.team0_score + 1
+    	else:
+    		self.team0_score = self.team0_score + 1
+
     @property
     def serialize(self):
         teams = Team.query.filter(Team.id.in_(
@@ -159,6 +165,6 @@ class MatchGoal(db.Model):
     def serialize(self):
         return {
             'id'		: self.id,
-            'player' 	: get_player(self).serialize,
+            'player' 	: self.get_player().serialize,
             'created'	: dump_datetime(self.created)
         }

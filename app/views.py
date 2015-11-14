@@ -150,3 +150,29 @@ def create_match(community):
 def get_matches(community):
     # add filtering
     return jsonify(matches=[m.serialize for m in community.matches.all()])
+
+
+@app.route('/matches/<match_id>', methods=['GET'])
+@match_resource
+def get_matche_detailes(match):
+    # add filtering
+    return jsonify(match.serialize)
+
+
+@app.route('/matches/<match_id>/<team_name>/goal', methods=['POST'])
+@match_resource
+@team_resource
+def push_goal(match, team):
+    match.add_goal(team)
+    db.session.add(match)
+
+    player_name = request.args.get('player')
+    if player_name is not None:
+        player = Player.query.filter_by(
+            community_id=match.community_id, username=player_name).first()
+        if player is not None:
+            goal = MatchGoal(community, match, player)
+            db.session.add(goal)
+
+    db.session.commit()
+    return jsonify(message="updated")

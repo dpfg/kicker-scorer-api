@@ -2,7 +2,7 @@
 from functools import wraps
 from flask import g, request, redirect, url_for, jsonify
 
-from app.models import Community
+from app.models import Community, Team, Match
 from app import app
 
 
@@ -32,14 +32,6 @@ def community_resource(f):
 def team_resource(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        community_name = kwargs['community_name']
-        community = Community.query.filter_by(name=community_name).first()
-        if community is None:
-            return "", 404
-
-        kwargs['community'] = community
-        kwargs.pop('community_name')
-
         team_name = kwargs['team_name']
         team = Team.query.filter_by(name=team_name).first()
         if team is None:
@@ -47,6 +39,21 @@ def team_resource(f):
 
         kwargs['team'] = team
         kwargs.pop('team_name')
+
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def match_resource(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        match_id = kwargs['match_id']
+        match = Match.query.get(match_id)
+        if match is None:
+            return "", 404
+
+        kwargs['match'] = match
+        kwargs.pop('match_id')
 
         return f(*args, **kwargs)
     return decorated_function
