@@ -76,6 +76,15 @@ def get_community_teams(community):
 @json_content
 @community_resource
 def create_team(community):
+    """Method to create new team in the community.
+
+    Required data:
+    - team name ('name')
+    - forward username ('forward')
+    - goalkeeper username ('goalkeeper')
+
+    If one of those fields is missed error will be returned.
+    """
     if 'name' not in request.json:
         return jsonify(message="missing required field: name")
 

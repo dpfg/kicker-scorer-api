@@ -1,3 +1,6 @@
+import re
+
+"""Collection of utils."""
 
 
 def dump_datetime(value):
@@ -6,9 +9,10 @@ def dump_datetime(value):
         return None
     return value.strftime("%Y-%m-%dT%H:%M:%S")
 
-import re
+
 community_name_regex = re.compile('^[0-9a-zA-Z_-]+$')
 
 
 def is_not_valid_entity_name(community_name):
+    """Check is string valid to be used in url path."""
     return community_name_regex.match(community_name) is None

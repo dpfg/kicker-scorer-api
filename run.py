@@ -1,4 +1,5 @@
 from app import app
+import config
 
-app.debug = True
+app.debug = config.DEBUG_MODE
 app.run()

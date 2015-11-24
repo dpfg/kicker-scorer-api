@@ -126,20 +126,23 @@ class Match(db.Model):
         self.team1_id = team1.id
 
     def add_goal(self, team):
-    	if team.id == self.team0_id:
-    		self.team0_score = self.team0_score + 1
-    	else:
-    		self.team0_score = self.team0_score + 1
+        if team.id == self.team0_id:
+            self.team0_score = self.team0_score + 1
+        else:
+            self.team0_score = self.team0_score + 1
 
     @property
     def serialize(self):
         teams = Team.query.filter(Team.id.in_(
             [self.team0_id, self.team1_id])).all()
         return {
-            'id'	: self.id,
-            'date'	: dump_datetime(self.match_datetime),
-            'teams'	: ([t.serialize for t in teams]),
-            'score'	: {teams[0].name: self.team0_score, teams[1].name: self.team1_score},
+            'id': self.id,
+            'date': dump_datetime(self.match_datetime),
+            'teams': ([t.serialize for t in teams]),
+            'score': {
+                teams[0].name: self.team0_score,
+                teams[1].name: self.team1_score
+                },
             'goals': ([g.serialize for g in self.goals.all()])
         }
 
