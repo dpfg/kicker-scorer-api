@@ -2,6 +2,8 @@ from app import app, db
 from app.models import *
 from app.util import *
 from app.decorators import *
+from app.service import TeamService, PlayerService
+
 from flask import jsonify, request
 
 
@@ -99,26 +101,20 @@ def create_team(community):
     if 'forward' not in request.json:
         return jsonify(message="missing required field: forward")
 
-    forward = request.json['forward'].lower()
-    forward = Player.query.filter_by(
-        community_id=community.id, username=forward).first()
+    forward = PlayerService.findByUsername(community, request.json['forward'])
     if forward is None:
         return jsonify(message="forward not found")
 
     if 'goalkeeper' not in request.json:
         return jsonify(message="missing required field: forward")
 
-    goalkeeper = request.json['goalkeeper'].lower()
-    goalkeeper = Player.query.filter_by(
-        community_id=community.id, username=goalkeeper).first()
+    goalkeeper = PlayerService.findByUsername(community, request.json['goalkeeper'])
     if goalkeeper is None:
         return jsonify(message="goalkeeper not found")
 
-    team = Team(community, name, forward, goalkeeper)
-    db.session.add(team)
-    db.session.commit()
+    team = TeamService.create(community, name, goalkeeper, forward)
 
-    return jsonify("")
+    return jsonify(team.serialize)
 
 
 @app.route('/communities/<community_name>/matches', methods=['POST'])
@@ -126,10 +122,8 @@ def create_team(community):
 @community_resource
 def create_match(community):
     if 'teams' not in request.json:
-        return jsonify(message="missing required field: teams"), 400
-
+        return jsonify(message="missing required dict: teams"), 400
     teams = request.json['teams']
-    app.logger.debug(teams)
 
     if not isinstance(teams, list):
         return jsonify(message="missing required dict: teams"), 400
@@ -137,21 +131,23 @@ def create_match(community):
     if len(teams) != 2:
         return jsonify(message="incorrect number of teams"), 400
 
-    team0 = Team.query.filter_by(
-        community_id=community.id, name=teams[0]).first()
+    team0 = TeamService.findOrCreate(community, teams[0])
     if team0 is None:
         return jsonify(message="teams[0]: not found"), 400
 
-    team1 = Team.query.filter_by(
-        community_id=community.id, name=teams[1]).first()
+    team1 = TeamService.findOrCreate(community, teams[1])
     if team1 is None:
         return jsonify(message="teams[1]: not found"), 400
+
+    if team0.id == team1.id:
+        return jsonify(message="teams are the same"), 400
 
     match = Match(community, team0, team1)
     db.session.add(match)
     db.session.commit()
 
-    return jsonify(match_id=str(match.id))
+    app.logger.debug("match has been created: " + str(match.id))
+    return jsonify(match.serialize)
 
 
 @app.route('/communities/<community_name>/matches', methods=['GET'])
@@ -168,10 +164,11 @@ def get_matche_detailes(match):
     return jsonify(match.serialize)
 
 
-@app.route('/matches/<match_id>/<team_name>/goal', methods=['POST'])
+@app.route('/matches/<match_id>/<team_id>/goal', methods=['POST'])
 @match_resource
 @team_resource
 def push_goal(match, team):
+    app.logger.debug(str(team.id))
     match.add_goal(team)
     db.session.add(match)
 
@@ -184,4 +181,5 @@ def push_goal(match, team):
             db.session.add(goal)
 
     db.session.commit()
-    return jsonify(message="updated")
+
+    return jsonify(match.serialize)

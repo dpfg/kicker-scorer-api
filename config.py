@@ -5,4 +5,4 @@
 SQLALCHEMY_DATABASE_URI = 'mysql://root:@localhost/kicker_db'
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 
-DEBUG_MODE = False
+DEBUG_MODE = True

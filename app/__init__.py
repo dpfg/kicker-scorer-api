@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask.ext.sqlalchemy import SQLAlchemy
 from werkzeug.exceptions import default_exceptions
 from werkzeug.exceptions import HTTPException
+from flask.ext.cors import CORS, cross_origin
 
 import pymysql
 
@@ -12,6 +13,8 @@ app = Flask(__name__)
 app.config.from_object('config')
 
 app.secret_key = 'some_secret'
+
+cors = CORS(app)
 
 db = SQLAlchemy(app)
 

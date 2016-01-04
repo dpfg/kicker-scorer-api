@@ -1,4 +1,4 @@
-from app import db
+from app import db, app
 from app.util import dump_datetime
 
 
@@ -129,7 +129,7 @@ class Match(db.Model):
         if team.id == self.team0_id:
             self.team0_score = self.team0_score + 1
         else:
-            self.team0_score = self.team0_score + 1
+            self.team1_score = self.team1_score + 1
 
     @property
     def serialize(self):
@@ -140,8 +140,8 @@ class Match(db.Model):
             'date': dump_datetime(self.match_datetime),
             'teams': ([t.serialize for t in teams]),
             'score': {
-                teams[0].name: self.team0_score,
-                teams[1].name: self.team1_score
+                teams[0].id: self.team0_score,
+                teams[1].id: self.team1_score
                 },
             'goals': ([g.serialize for g in self.goals.all()])
         }
@@ -151,15 +151,18 @@ class MatchGoal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     community_id = db.Column(db.Integer, nullable=False, index=True)
     match_id = db.Column(db.Integer, nullable=False)
-    player_id = db.Column(db.Integer, nullable=False)
+    team_id = db.Column(db.Integer, nullable=False)
+    player_id = db.Column(db.Integer, nullable=True)
 
     created = db.Column(db.TIMESTAMP, server_default=db.text(
         'CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'))
 
-    def __init__(self, community, match, player):
+    def __init__(self, community, match, team, player):
         self.community_id = community.id
         self.match_id = match.id
-        self.player_id = player.id
+        self.team_id = team.id
+        if player is not None:
+            self.player_id = player.id
 
     def get_player(self):
         return Player.query.get(self.player_id)

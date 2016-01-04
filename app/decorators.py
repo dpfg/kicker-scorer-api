@@ -32,13 +32,13 @@ def community_resource(f):
 def team_resource(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        team_name = kwargs['team_name']
-        team = Team.query.filter_by(name=team_name).first()
+        team_id = kwargs['team_id']
+        team = Team.query.get(team_id)
         if team is None:
             return "", 404
 
         kwargs['team'] = team
-        kwargs.pop('team_name')
+        kwargs.pop('team_id')
 
         return f(*args, **kwargs)
     return decorated_function
