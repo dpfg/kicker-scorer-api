@@ -168,18 +168,31 @@ def get_matche_detailes(match):
 @match_resource
 @team_resource
 def push_goal(match, team):
-    app.logger.debug(str(team.id))
-    match.add_goal(team)
+    if match.completed:
+        return jsonify(message='match is completed'), 400
+
+    goal = match.add_goal(team)
+    db.session.add(goal)
     db.session.add(match)
 
-    player_name = request.args.get('player')
-    if player_name is not None:
-        player = Player.query.filter_by(
-            community_id=match.community_id, username=player_name).first()
+    player_id = request.args.get('player')
+    if player_id is not None:
+        player = Player.query.get(player_id)
         if player is not None:
-            goal = MatchGoal(community, match, player)
-            db.session.add(goal)
+            goal.player_id = player_id
 
     db.session.commit()
 
-    return jsonify(match.serialize)
+    return jsonify(goal.serialize)
+
+
+@app.route('/goals/<goal_id>', methods=['DELETE'])
+def delete_goal(goal_id):
+    goal = MatchGoal.query.get(goal_id)
+    if goal is None:
+        return jsonify(message="could not find goal"), 400
+
+    db.session.delete(goal)
+    db.session.commit()
+
+    return ""
