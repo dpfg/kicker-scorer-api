@@ -2,7 +2,7 @@ from app import app, db
 from app.models import *
 from app.util import *
 from app.decorators import *
-from app.service import TeamService, PlayerService
+from app.service import TeamService, PlayerService, MatchService
 
 from flask import jsonify, request
 
@@ -101,14 +101,14 @@ def create_team(community):
     if 'forward' not in request.json:
         return jsonify(message="missing required field: forward")
 
-    forward = PlayerService.findByUsername(community, request.json['forward'])
+    forward = PlayerService.find_by_username(community, request.json['forward'])
     if forward is None:
         return jsonify(message="forward not found")
 
     if 'goalkeeper' not in request.json:
         return jsonify(message="missing required field: forward")
 
-    goalkeeper = PlayerService.findByUsername(community, request.json['goalkeeper'])
+    goalkeeper = PlayerService.find_by_username(community, request.json['goalkeeper'])
     if goalkeeper is None:
         return jsonify(message="goalkeeper not found")
 
@@ -131,11 +131,11 @@ def create_match(community):
     if len(teams) != 2:
         return jsonify(message="incorrect number of teams"), 400
 
-    team0 = TeamService.findOrCreate(community, teams[0])
+    team0 = TeamService.find_or_create(community, teams[0])
     if team0 is None:
         return jsonify(message="teams[0]: not found"), 400
 
-    team1 = TeamService.findOrCreate(community, teams[1])
+    team1 = TeamService.find_or_create(community, teams[1])
     if team1 is None:
         return jsonify(message="teams[1]: not found"), 400
 
@@ -154,7 +154,7 @@ def create_match(community):
 @community_resource
 def get_matches(community):
     # add filtering
-    return jsonify(matches=[m.serialize for m in community.matches.all()])
+    return jsonify(matches=[m.serialize for m in MatchService.get_all(community)])
 
 
 @app.route('/matches/<match_id>', methods=['GET'])

@@ -125,11 +125,11 @@ class Match(db.Model):
 
     def add_goal(self, team):
         goals = db.session \
-                    .query(db.func.count(MatchGoal.id)) \
+                    .query(MatchGoal.match_id, 'team_id', db.func.count(MatchGoal.id)) \
                     .filter_by(match_id=self.id).group_by('team_id').all()
-        app.logger.debug(goals)
+
         for team_goals in goals:
-            if team_goals[0] >= 9:
+            if team_goals[2] == 9 and team_goals[1] == team.id:
                 self.completed = True
         return MatchGoal(self.community_id, self.id, team.id)
 
