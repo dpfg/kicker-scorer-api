@@ -1,6 +1,6 @@
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
-from config import SQLALCHEMY_DATABASE_URI
+from config import *
 from app import app, db
 
 import pymysql

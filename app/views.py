@@ -9,8 +9,6 @@ from flask import jsonify, request
 
 @app.route('/')
 def init():
-    db.session.add(User(email='super@exampe.com'))
-    db.session.commit()
     return jsonify(message='service has been initialized')
 
 
