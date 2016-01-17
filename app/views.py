@@ -4,21 +4,23 @@ from app.util import *
 from app.decorators import *
 from app.service import TeamService, PlayerService, MatchService
 
-from flask import jsonify, request
+from flask import jsonify, request, Blueprint
+
+api = Blueprint('api', __name__, url_prefix='/api')
 
 
-@app.route('/')
+@api.route('/')
 def init():
     return jsonify(message='service has been initialized')
 
 
-@app.route('/communities', methods=['GET'])
+@api.route('/communities', methods=['GET'])
 def get_communities():
     communities = Community.query.all()
     return jsonify(communities=[i.serialize for i in communities])
 
 
-@app.route('/communities', methods=['POST'])
+@api.route('/communities', methods=['POST'])
 @json_content
 def create_community():
     if 'name' not in request.json:
@@ -38,7 +40,7 @@ def create_community():
     return ""
 
 
-@app.route('/communities/<community_name>/players', methods=['POST'])
+@api.route('/communities/<community_name>/players', methods=['POST'])
 @json_content
 @community_resource
 def create_player(community):
@@ -60,19 +62,19 @@ def create_player(community):
     return jsonify(username=player.username)
 
 
-@app.route('/communities/<community_name>/players', methods=['GET'])
+@api.route('/communities/<community_name>/players', methods=['GET'])
 @community_resource
 def get_community_players(community):
     return jsonify(players=[p.serialize for p in community.players])
 
 
-@app.route('/communities/<community_name>/teams', methods=['GET'])
+@api.route('/communities/<community_name>/teams', methods=['GET'])
 @community_resource
 def get_community_teams(community):
     return jsonify(teams=[t.serialize for t in community.teams])
 
 
-@app.route('/communities/<community_name>/teams', methods=['POST'])
+@api.route('/communities/<community_name>/teams', methods=['POST'])
 @json_content
 @community_resource
 def create_team(community):
@@ -115,7 +117,7 @@ def create_team(community):
     return jsonify(team.serialize)
 
 
-@app.route('/communities/<community_name>/matches', methods=['POST'])
+@api.route('/communities/<community_name>/matches', methods=['POST'])
 @json_content
 @community_resource
 def create_match(community):
@@ -144,25 +146,24 @@ def create_match(community):
     db.session.add(match)
     db.session.commit()
 
-    app.logger.debug("match has been created: " + str(match.id))
     return jsonify(match.serialize)
 
 
-@app.route('/communities/<community_name>/matches', methods=['GET'])
+@api.route('/communities/<community_name>/matches', methods=['GET'])
 @community_resource
 def get_matches(community):
     # add filtering
     return jsonify(matches=[m.serialize for m in MatchService.get_all(community)])
 
 
-@app.route('/matches/<match_id>', methods=['GET'])
+@api.route('/matches/<match_id>', methods=['GET'])
 @match_resource
 def get_matche_detailes(match):
     # add filtering
     return jsonify(match.serialize)
 
 
-@app.route('/matches/<match_id>/<team_id>/goal', methods=['POST'])
+@api.route('/matches/<match_id>/<team_id>/goal', methods=['POST'])
 @match_resource
 @team_resource
 def push_goal(match, team):
@@ -184,7 +185,7 @@ def push_goal(match, team):
     return jsonify(goal.serialize)
 
 
-@app.route('/goals/<goal_id>', methods=['DELETE'])
+@api.route('/goals/<goal_id>', methods=['DELETE'])
 def delete_goal(goal_id):
     goal = MatchGoal.query.get(goal_id)
     if goal is None:

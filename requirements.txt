@@ -3,4 +3,3 @@ Flask-SQLAlchemy
 Flask-Migrate
 Flask-Cors
 PyMySQL
-Gunicorn
