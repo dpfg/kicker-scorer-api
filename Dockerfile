@@ -6,4 +6,6 @@ RUN mkdir -p /code/api
 
 COPY . /code/api
 
+RUN chmod +x /code/api/prepare.sh
+
 VOLUME ["/code/api"]
