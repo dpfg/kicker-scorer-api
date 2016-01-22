@@ -179,6 +179,9 @@ class MatchGoal(db.Model):
     def get_player(self):
         return Player.query.get(self.player_id)
 
+    def get_match(self):
+        return Match.query.get(self.match_id)
+
     @property
     def serialize(self):
         return {

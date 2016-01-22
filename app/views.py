@@ -191,6 +191,9 @@ def delete_goal(goal_id):
     if goal is None:
         return jsonify(message="could not find goal"), 400
 
+    if goal.get_match().completed:
+        return jsonify(message='match is completed'), 400
+
     db.session.delete(goal)
     db.session.commit()
 

@@ -2,6 +2,7 @@
 
 from app.models import Team, Player, Match
 from app import db
+from app.util import generate_team_name
 
 
 class TeamService(object):
@@ -40,7 +41,17 @@ class TeamService(object):
         if gk is None or fw is None:
             return None
 
-        return TeamService.create(community, "ag:", gk, fw)
+        team_name = TeamService.generate_team_name(community)
+        return TeamService.create(community, team_name, gk, fw)
+
+    @staticmethod
+    def generate_team_name(community):
+        rand_name = generate_team_name()
+        existed_team = Team.query.filter_by(community_id=community.id, name=rand_name).first()
+        if existed_team is None:
+            return rand_name
+        else:
+            generate_team_name(community)
 
     @staticmethod
     def create(community, name, gk, fw):
