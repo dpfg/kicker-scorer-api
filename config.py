@@ -10,4 +10,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 # App settings
 APPLICATION_ROOT = '/api'
-DEBUG_MODE = False
+DEBUG = True
+
+# JWT settings
+JWT_AUTH_URL_RULE = APPLICATION_ROOT + "/auth"

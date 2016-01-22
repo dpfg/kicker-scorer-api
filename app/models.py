@@ -1,6 +1,6 @@
 from app import db, app
 from app.util import dump_datetime
-
+from app.auth import generate_password_hash, check_password_hash
 
 class Community(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -43,6 +43,7 @@ class Community(db.Model):
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(200))
+    password_hash = db.Column(db.String(300))
     communities = db.relationship('Community', backref='User',
                                   lazy='dynamic',
                                   primaryjoin="User.id==Community.owner_id",
@@ -53,9 +54,15 @@ class User(db.Model):
     created = db.Column(db.TIMESTAMP, server_default=db.text(
         'UTC_TIMESTAMP ON UPDATE UTC_TIMESTAMP'))
 
-    def __init__(self, email):
+    def __init__(self, email, password):
         self.email = email
+        self.set_password(password)
 
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 class Player(db.Model):
     id = db.Column(db.Integer, primary_key=True)

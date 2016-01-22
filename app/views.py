@@ -5,22 +5,26 @@ from app.decorators import *
 from app.service import TeamService, PlayerService, MatchService
 
 from flask import jsonify, request, Blueprint
+from flask_jwt import jwt_required, current_identity
+
 
 api = Blueprint('api', __name__, url_prefix='/api')
 
-
 @api.route('/')
+@jwt_required()
 def init():
     return jsonify(message='service has been initialized')
 
 
 @api.route('/communities', methods=['GET'])
+@jwt_required()
 def get_communities():
     communities = Community.query.all()
     return jsonify(communities=[i.serialize for i in communities])
 
 
 @api.route('/communities', methods=['POST'])
+@jwt_required()
 @json_content
 def create_community():
     if 'name' not in request.json:
@@ -41,6 +45,7 @@ def create_community():
 
 
 @api.route('/communities/<community_name>/players', methods=['POST'])
+@jwt_required()
 @json_content
 @community_resource
 def create_player(community):
@@ -63,18 +68,21 @@ def create_player(community):
 
 
 @api.route('/communities/<community_name>/players', methods=['GET'])
+@jwt_required()
 @community_resource
 def get_community_players(community):
     return jsonify(players=[p.serialize for p in community.players])
 
 
 @api.route('/communities/<community_name>/teams', methods=['GET'])
+@jwt_required()
 @community_resource
 def get_community_teams(community):
     return jsonify(teams=[t.serialize for t in community.teams])
 
 
 @api.route('/communities/<community_name>/teams', methods=['POST'])
+@jwt_required()
 @json_content
 @community_resource
 def create_team(community):
@@ -118,6 +126,7 @@ def create_team(community):
 
 
 @api.route('/communities/<community_name>/matches', methods=['POST'])
+@jwt_required()
 @json_content
 @community_resource
 def create_match(community):
@@ -150,6 +159,7 @@ def create_match(community):
 
 
 @api.route('/communities/<community_name>/matches', methods=['GET'])
+@jwt_required()
 @community_resource
 def get_matches(community):
     # add filtering
@@ -157,6 +167,7 @@ def get_matches(community):
 
 
 @api.route('/matches/<match_id>', methods=['GET'])
+@jwt_required()
 @match_resource
 def get_matche_detailes(match):
     # add filtering
@@ -164,6 +175,7 @@ def get_matche_detailes(match):
 
 
 @api.route('/matches/<match_id>/<team_id>/goal', methods=['POST'])
+@jwt_required()
 @match_resource
 @team_resource
 def push_goal(match, team):
@@ -186,6 +198,7 @@ def push_goal(match, team):
 
 
 @api.route('/goals/<goal_id>', methods=['DELETE'])
+@jwt_required()
 def delete_goal(goal_id):
     goal = MatchGoal.query.get(goal_id)
     if goal is None:
