@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 
 # DB settings
@@ -14,3 +15,4 @@ DEBUG = True
 
 # JWT settings
 JWT_AUTH_URL_RULE = APPLICATION_ROOT + "/auth"
+JWT_EXPIRATION_DELTA = timedelta(minutes=60)

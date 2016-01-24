@@ -25,6 +25,6 @@ colors = ["red", "green", "blue", "yellow", "purple", "mint green", "teal", "whi
 colors_num = len(colors)
 
 def generate_team_name():
-    random_color = colors[randint(0, colors_num)]
-    random_creature = creatures[randint(0, creatures_num)]
+    random_color = colors[randint(0, colors_num - 1)]
+    random_creature = creatures[randint(0, creatures_num - 1)]
     return  "{:s} {:s}".format(random_color, random_creature)
