@@ -3,4 +3,5 @@ Flask-SQLAlchemy
 Flask-Migrate
 Flask-Cors
 Flask-JWT
+Flask-Restful
 PyMySQL

@@ -1,6 +1,7 @@
 from app import db, app
 from app.util import dump_datetime
-from app.auth import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 class Community(db.Model):
     id = db.Column(db.Integer, primary_key=True)

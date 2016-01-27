@@ -1,8 +1,6 @@
 from app import app
 from app import models
 from flask_jwt import JWT, jwt_required, current_identity
-from werkzeug.security import generate_password_hash, check_password_hash
-
 
 def authenticate(username, password):
     user = models.User.query.filter_by(email=username).first()
