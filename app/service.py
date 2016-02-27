@@ -21,16 +21,13 @@ class TeamService(object):
 
     @staticmethod
     def find_by_name(community, name):
-        return Team.query.filter_by(
-                        community_id=community.id,
-                        name=name).first()
+        return Team.query.filter_by(community_id=community.id,name=name).first()
 
     @staticmethod
     def find_by_player_ids(community, gk_id, fw_id):
-        team = Team.query.filter_by(
-            community_id=community.id,
-            goalkeeper_id=gk_id,
-            forward_id=fw_id).first()
+        team = Team.query \
+                    .filter_by(community_id=community.id, goalkeeper_id=gk_id,forward_id=fw_id) \
+                    .first()
 
         if team is not None:
             return team

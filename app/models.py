@@ -10,23 +10,21 @@ class Community(db.Model):
     created = db.Column(db.TIMESTAMP, server_default=db.text(
         'UTC_TIMESTAMP ON UPDATE UTC_TIMESTAMP'))
 
-    players = db.relationship('Player', backref='Community',
-                              lazy='dynamic',
-                              primaryjoin="Player.community_id==Community.id",
-                              foreign_keys="Player.community_id",
-                              passive_deletes='all')
+    players = db.relationship('Player',
+                                backref='Community',
+                                lazy='dynamic',
+                                primaryjoin="Player.community_id==Community.id",
+                                foreign_keys="Player.community_id")
 
     teams = db.relationship('Team', backref='Community',
-                            lazy='dynamic',
-                            primaryjoin="Team.community_id==Community.id",
-                            foreign_keys="Team.community_id",
-                            passive_deletes='all')
+                                lazy='dynamic',
+                                primaryjoin="Team.community_id==Community.id",
+                                foreign_keys="Team.community_id")
 
     matches = db.relationship('Match', backref='Community',
-                              lazy='dynamic',
-                              primaryjoin="Match.community_id==Community.id",
-                              foreign_keys="Match.community_id",
-                              passive_deletes='all')
+                                lazy='dynamic',
+                                primaryjoin="Match.community_id==Community.id",
+                                foreign_keys="Match.community_id")
 
     def __init__(self, name, owner):
         self.name = name
@@ -52,8 +50,7 @@ class User(db.Model):
                                       Community.__table__.c.owner_id],
                                   passive_deletes='all')
 
-    created = db.Column(db.TIMESTAMP, server_default=db.text(
-        'UTC_TIMESTAMP ON UPDATE UTC_TIMESTAMP'))
+    created = db.Column(db.TIMESTAMP, server_default=db.text('UTC_TIMESTAMP ON UPDATE UTC_TIMESTAMP'))
 
     def __init__(self, email, password):
         self.email = email
@@ -69,8 +66,7 @@ class Player(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     community_id = db.Column(db.Integer, nullable=False, index=True)
     username = db.Column(db.String(100), nullable=False)
-    created = db.Column(db.TIMESTAMP, server_default=db.text(
-        'UTC_TIMESTAMP ON UPDATE UTC_TIMESTAMP'))
+    created = db.Column(db.TIMESTAMP, server_default=db.text('UTC_TIMESTAMP ON UPDATE UTC_TIMESTAMP'))
 
     def __init__(self, community, username):
         self.username = username
@@ -93,6 +89,18 @@ class Team(db.Model):
     created = db.Column(db.TIMESTAMP, server_default=db.text(
         'UTC_TIMESTAMP ON UPDATE UTC_TIMESTAMP'))
 
+    forward = db.relationship('Player',
+                            lazy='joined',
+                            primaryjoin="Player.id==Team.forward_id",
+                            foreign_keys="Player.id",
+                            uselist=False)
+
+    goalkeeper = db.relationship('Player',
+                            lazy='joined',
+                            primaryjoin="Player.id==Team.goalkeeper_id",
+                            foreign_keys="Player.id",
+                            uselist=False)
+
     def __init__(self, community, name, forward, goalkeeper):
         self.community_id = community.id
         self.name = name
@@ -104,10 +112,8 @@ class Team(db.Model):
         return {
             'id'			: self.id,
             'name'			: self.name,
-            # change to join and single query
-            'forward'  		: Player.query.get(self.forward_id).serialize,
-            # change to join and single query
-            'goalkeeper'	: Player.query.get(self.goalkeeper_id).serialize
+            'forward'  		: self.forward.serialize,
+            'goalkeeper'	: self.goalkeeper.serialize
         }
 
 
@@ -120,11 +126,9 @@ class Match(db.Model):
     team1_id = db.Column(db.Integer, nullable=False)
     completed = db.Column(db.Boolean, nullable=False, default=False)
 
-    goals = db.relationship('MatchGoal', backref='Match',
-                            lazy='joined',
-                            primaryjoin="MatchGoal.match_id==Match.id",
-                            foreign_keys="MatchGoal.match_id",
-                            passive_deletes='all')
+    goals = db.relationship('MatchGoal', backref='Match', lazy='joined', primaryjoin="MatchGoal.match_id==Match.id",foreign_keys="MatchGoal.match_id")
+    team0 = db.relationship('Team', lazy='joined', primaryjoin='Team.id==Match.team0_id', foreign_keys='Team.id', uselist=False)
+    team1 = db.relationship('Team', lazy='joined', primaryjoin='Team.id==Match.team1_id', foreign_keys='Team.id', uselist=False)
 
     @classmethod
     def create(cls, community, team0, team1):
@@ -132,16 +136,6 @@ class Match(db.Model):
         match.community_id = community.id
         match.team0_id = team0.id
         match.team1_id = team1.id
-        return match
-
-    @classmethod
-    def mock(cls, team0_id, team0_score, team1_id, team1_score):
-        match = cls()
-        match.community_id = 1
-        match.team0_id = team0_id
-        match.team1_id = team1_id
-        match.team0_score = team0_score
-        match.team1_score = team1_score
         return match
 
     def add_goal(self, team):
@@ -173,16 +167,15 @@ class Match(db.Model):
 
     @property
     def serialize(self):
-        teams = Team.query.filter(Team.id.in_([self.team0_id, self.team1_id])).all()
         goals = self.goals
 
         return {
             'id': self.id,
             'date': dump_datetime(self.match_datetime),
-            'teams': ([t.serialize for t in teams]),
+            'teams': [self.team0.serialize, self.team1.serialize],
             'score': {
-                teams[0].id: self.team0_score,
-                teams[1].id: self.team1_score
+                self.team0.id: self.team0_score,
+                self.team1.id: self.team1_score
                 },
             'goals': ([g.serialize for g in goals]),
             'completed': self.completed
@@ -196,15 +189,7 @@ class MatchGoal(db.Model):
     team_id = db.Column(db.Integer, nullable=False)
     player_id = db.Column(db.Integer, nullable=True)
 
-    created = db.Column(db.TIMESTAMP, server_default=db.text(
-        'UTC_TIMESTAMP ON UPDATE UTC_TIMESTAMP'))
-
-    def __init__(self, community, match, team, player):
-        self.community_id = community.id
-        self.match_id = match.id
-        self.team_id = team.id
-        if player is not None:
-            self.player_id = player.id
+    created = db.Column(db.TIMESTAMP, server_default=db.text('UTC_TIMESTAMP ON UPDATE UTC_TIMESTAMP'))
 
     def __init__(self, community_id, match_id, team_id):
         self.community_id = community_id
