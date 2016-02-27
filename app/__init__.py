@@ -32,6 +32,7 @@ from app.resources.communities import CommunityResource
 from app.resources.matches import MatchResource, CommunityMatchesResource, MatchGoalsResource
 from app.resources.players import PlayersResource
 from app.resources.teams import TeamsResource
+from app.resources.teams_rating import TeamsRatingResource
 from app.resources.goals import GoalResource
 
 api_blueprint = Blueprint('api', __name__, url_prefix='/api')
@@ -41,6 +42,7 @@ api.add_resource(HealthCheck, '/health')
 api.add_resource(CommunityResource, '/communities')
 api.add_resource(PlayersResource, '/communities/<community_name>/players')
 api.add_resource(TeamsResource, '/communities/<community_name>/teams')
+api.add_resource(TeamsRatingResource, '/communities/<community_name>/teams/rating')
 api.add_resource(CommunityMatchesResource, '/communities/<community_name>/matches')
 
 api.add_resource(MatchResource, '/matches/<match_id>')

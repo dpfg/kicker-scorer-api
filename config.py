@@ -1,6 +1,9 @@
 import os
 from datetime import timedelta
 
+# App settings
+APPLICATION_ROOT = '/api'
+DEBUG = True
 
 # DB settings
 db_host = os.getenv('DB_HOST', 'localhost')
@@ -10,10 +13,8 @@ SQLALCHEMY_DATABASE_URI = "mysql://{:s}:{:s}@{:s}:3306/kicker_db".format(db_user
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 SQLALCHEMY_POOL_RECYCLE = 3600
 SQLALCHEMY_POOL_TIMEOUT = 20
-
-# App settings
-APPLICATION_ROOT = '/api'
-DEBUG = True
+if DEBUG:
+	SQLALCHEMY_ECHO = True
 
 # JWT settings
 JWT_AUTH_URL_RULE = APPLICATION_ROOT + "/auth"

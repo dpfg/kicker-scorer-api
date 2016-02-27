@@ -40,7 +40,7 @@ class CommunityMatchesResource(CommunityBasedResource):
         if team0.id == team1.id:
             return { "message" : "teams are the same"}, 400
 
-        match = Match(community, team0, team1)
+        match = Match.create(community, team0, team1)
         db.session.add(match)
         db.session.commit()
 

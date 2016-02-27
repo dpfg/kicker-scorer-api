@@ -121,20 +121,34 @@ class Match(db.Model):
     completed = db.Column(db.Boolean, nullable=False, default=False)
 
     goals = db.relationship('MatchGoal', backref='Match',
-                            lazy='dynamic',
+                            lazy='joined',
                             primaryjoin="MatchGoal.match_id==Match.id",
                             foreign_keys="MatchGoal.match_id",
                             passive_deletes='all')
 
-    def __init__(self, community, team0, team1):
-        self.community_id = community.id
-        self.team0_id = team0.id
-        self.team1_id = team1.id
+    @classmethod
+    def create(cls, community, team0, team1):
+        match = cls()
+        match.community_id = community.id
+        match.team0_id = team0.id
+        match.team1_id = team1.id
+        return match
+
+    @classmethod
+    def mock(cls, team0_id, team0_score, team1_id, team1_score):
+        match = cls()
+        match.community_id = 1
+        match.team0_id = team0_id
+        match.team1_id = team1_id
+        match.team0_score = team0_score
+        match.team1_score = team1_score
+        return match
 
     def add_goal(self, team):
         goals = db.session \
                     .query(MatchGoal.match_id, 'team_id', db.func.count(MatchGoal.id)) \
-                    .filter_by(match_id=self.id).group_by('team_id').all()
+                    .filter_by(match_id=self.id) \
+					.group_by('team_id').all()
 
         for team_goals in goals:
             if team_goals[2] == 9 and team_goals[1] == team.id:
@@ -142,20 +156,33 @@ class Match(db.Model):
         return MatchGoal(self.community_id, self.id, team.id)
 
     @property
+    def team0_score(self):
+        return len(self.team0_goals)
+
+    @property
+    def team1_score(self):
+        return len(self.team1_goals)
+
+    @property
+    def	team0_goals(self):
+        return [g for g in self.goals if g.team_id == self.team0_id]
+
+    @property
+    def	team1_goals(self):
+        return [g for g in self.goals if g.team_id == self.team1_id]
+
+    @property
     def serialize(self):
-        teams = Team.query.filter(Team.id.in_(
-            [self.team0_id, self.team1_id])).all()
-        goals = self.goals.all()
-        team0_goals = [g for g in goals if g.team_id == self.team0_id]
-        team1_goals = [g for g in goals if g.team_id == self.team1_id]
+        teams = Team.query.filter(Team.id.in_([self.team0_id, self.team1_id])).all()
+        goals = self.goals
 
         return {
             'id': self.id,
             'date': dump_datetime(self.match_datetime),
             'teams': ([t.serialize for t in teams]),
             'score': {
-                teams[0].id: len(team0_goals),
-                teams[1].id: len(team1_goals)
+                teams[0].id: self.team0_score,
+                teams[1].id: self.team1_score
                 },
             'goals': ([g.serialize for g in goals]),
             'completed': self.completed

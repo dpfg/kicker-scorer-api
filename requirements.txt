@@ -5,3 +5,4 @@ Flask-Cors
 Flask-JWT
 Flask-Restful
 PyMySQL
+elo
