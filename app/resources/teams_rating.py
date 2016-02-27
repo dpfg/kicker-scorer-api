@@ -7,7 +7,7 @@ class TeamsRatingResource(CommunityBasedResource):
 
 	def get(self, community):
 		matches = Match.query.filter_by(completed=True).all()
-		rating = calc_teams_rating(Match.query.filter_by(completed=True).all())
+		rating = calc_teams_rating(matches)
 		team_ids = [m.team0_id for m in matches] + [m.team1_id for m in matches]
 		teams = Team.query.filter(Team.id.in_(team_ids)).all()
 
