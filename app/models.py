@@ -126,7 +126,7 @@ class Match(db.Model):
     team1_id = db.Column(db.Integer, nullable=False)
     completed = db.Column(db.Boolean, nullable=False, default=False)
 
-    goals = db.relationship('MatchGoal', backref='Match', lazy='joined', primaryjoin="MatchGoal.match_id==Match.id",foreign_keys="MatchGoal.match_id")
+    goals = db.relationship('MatchGoal', backref='Match', lazy='joined', primaryjoin="MatchGoal.match_id==Match.id",foreign_keys="MatchGoal.match_id", order_by="MatchGoal.id")
     team0 = db.relationship('Team', lazy='joined', primaryjoin='Team.id==Match.team0_id', foreign_keys='Team.id', uselist=False)
     team1 = db.relationship('Team', lazy='joined', primaryjoin='Team.id==Match.team1_id', foreign_keys='Team.id', uselist=False)
 
@@ -211,3 +211,6 @@ class MatchGoal(db.Model):
             'match_id': self.match_id,
             'created': dump_datetime(self.created)
         }
+
+    def	__str__(self):
+        return str(self.id) + ' ' + str(self.created)

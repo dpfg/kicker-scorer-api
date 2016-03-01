@@ -13,7 +13,7 @@ class GoalResource(ProtectedResource):
             return {"message" : "could not find goal"}, 400
 
         match = goal.get_match()
-        last_goal_datetime = match.goals.order_by(MatchGoal.created).first().created
+        last_goal_datetime = match.goals[-1].created
         completedInSec = (datetime.utcnow() - last_goal_datetime).total_seconds()
 
         if match.completed and completedInSec > GoalResource.MATCH_COMPLETION_DELAY_SEC:
