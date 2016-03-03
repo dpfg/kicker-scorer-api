@@ -18,4 +18,4 @@ if DEBUG:
 
 # JWT settings
 JWT_AUTH_URL_RULE = APPLICATION_ROOT + "/auth"
-JWT_EXPIRATION_DELTA = timedelta(minutes=60)
+JWT_EXPIRATION_DELTA = timedelta(minutes=180)
